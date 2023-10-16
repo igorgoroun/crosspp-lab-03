@@ -8,6 +8,12 @@ char *getm(char *code) {
     if (strcmp(code, "_M_CLI_HELP") == 0) {
         strcat(mess, _M_CLI_HELP);
     }
+    if (strcmp(code, "_M_CLI_FEXIST") == 0) {
+        strcat(mess, _M_CLI_FEXIST);
+    }
+    if (strcmp(code, "_M_CLI_FCREATED") == 0) {
+        strcat(mess, _M_CLI_FCREATED);
+    }
     char* str = (char*) malloc(sizeof(char) * (strlen(mess) + 1));
     strcpy(str, mess);
     return str;
