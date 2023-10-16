@@ -25,10 +25,10 @@ int main(int argc, char *argv[], char *envp[])
     if (req_value == NULL) {
         req_value = "en";
     }
+    // get lang file name
+    char ll_name[17] = "";
+    snprintf(ll_name, 17, "libmessage_%s.so", req_value);
     // load lang lib
-    char ll_name[17] = "libmessage_";
-    strcat(ll_name, req_value);
-    strcat(ll_name, ".so");
     void *ll_lib = dlopen(ll_name, RTLD_LAZY);
     if (!ll_lib) {
         printf("Cannot open message library %s\n", ll_name);
