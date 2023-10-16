@@ -3,5 +3,5 @@ touch.exe
 a.out
 *.a
 *.o
-
+*.so
 

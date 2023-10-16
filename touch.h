@@ -8,6 +8,7 @@
 #define FIRST_SLASH 0
 #endif
 
+#define LANG_ENV_VARIABLE "LANGUAGE"
 #define MAX_DIR_LEN 64
 #define MAX_DIRS 16
 

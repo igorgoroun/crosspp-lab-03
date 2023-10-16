@@ -2,13 +2,43 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dlfcn.h>
 
-int main(int argc, char *argv[])
+
+char *get_message(void *lib, char *code) {
+    char *(*fptr)(char *);
+
+    *(void **)(&fptr) = dlsym(lib, "getm");
+    char *dl_error = dlerror();
+    if (dl_error) {
+        printf("Cannot find or open %s function%s", code, LNE);
+        return NULL;
+    }
+    char *r = fptr(code);
+    return r;
+}
+
+int main(int argc, char *argv[], char *envp[])
 {
+    // check for env variable LANGUAGE
+    char *req_value = getenv(LANG_ENV_VARIABLE);
+    if (req_value == NULL) {
+        req_value = "en";
+    }
+    // load lang lib
+    char ll_name[17] = "libmessage_";
+    strcat(ll_name, req_value);
+    strcat(ll_name, ".so");
+    void *ll_lib = dlopen(ll_name, RTLD_LAZY);
+    if (!ll_lib) {
+        printf("Cannot open message library %s\n", ll_name);
+        exit(EXIT_FAILURE);
+    }
+
     if (argc < 2) {
-        printf("Please define file path and name to be created.\n");
-        printf("Usage:\n");
-        printf("%s ABSOLUTE_FILE_PATH_AND_NAME\n\n", argv[0]);
+        char *help = get_message(ll_lib, "_M_CLI_HELP");
+        printf("%s%s", help, LNE);
+        printf("%s ABSOLUTE_FILE_PATH_AND_NAME%s", argv[0], LNE);
         exit(EXIT_FAILURE);
     }
 
@@ -44,10 +74,12 @@ int main(int argc, char *argv[])
     if (file_res == 0) {
         file_create(dir_path);
     } else {
-        printf("Error: File [%s] already exists!%s", dir_path, LNE);
+        char *fexists_err = get_message(ll_lib, "_M_CLI_FEXIST");
+        printf("%s [%s]%s", fexists_err, dir_path, LNE);
         return EXIT_FAILURE;
     }
 
-    printf("Empty file [%s] created.%s", dir_path, LNE);
+    char *fcreated = get_message(ll_lib, "_M_CLI_FCREATED");
+    printf("%s [%s]%s", fcreated, dir_path, LNE);
     return EXIT_SUCCESS;
 }
