@@ -1,44 +1,19 @@
-#include "touch.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <dlfcn.h>
+#include "touch.h"
+#include "libmessage.h"
 
-
-char *get_message(void *lib, char *code) {
-    char *(*fptr)(char *);
-
-    *(void **)(&fptr) = dlsym(lib, "getm");
-    char *dl_error = dlerror();
-    if (dl_error) {
-        printf("Cannot find or open %s function%s", code, LNE);
-        return NULL;
-    }
-    char *r = fptr(code);
-    return r;
-}
 
 int main(int argc, char *argv[], char *envp[])
 {
-    // check for env variable LANGUAGE
-    char *req_value = getenv(LANG_ENV_VARIABLE);
-    if (req_value == NULL) {
-        req_value = "en";
-    }
-    // get lang file name
-    char ll_name[17] = "";
-    snprintf(ll_name, 17, "libmessage_%s.so", req_value);
-    // load lang lib
-    void *ll_lib = dlopen(ll_name, RTLD_LAZY);
-    if (!ll_lib) {
-        printf("Cannot open message library %s\n", ll_name);
-        exit(EXIT_FAILURE);
-    }
+    // prepare library
+    void *mlib = get_message_lib();
 
     if (argc < 2) {
-        char *help = get_message(ll_lib, "_M_CLI_HELP");
-        printf("%s%s", help, LNE);
-        printf("%s ABSOLUTE_FILE_PATH_AND_NAME%s", argv[0], LNE);
+        print_message(mlib, "_M_CLI_HELP", "");
+        print_simple(argv[0], "ABSOLUTE_FILE_PATH_AND_NAME");
         exit(EXIT_FAILURE);
     }
 
@@ -74,12 +49,12 @@ int main(int argc, char *argv[], char *envp[])
     if (file_res == 0) {
         file_create(dir_path);
     } else {
-        char *fexists_err = get_message(ll_lib, "_M_CLI_FEXIST");
-        printf("%s [%s]%s", fexists_err, dir_path, LNE);
+        // print file exists message
+        print_message(mlib, "_M_CLI_FEXIST", dir_path);
         return EXIT_FAILURE;
     }
 
-    char *fcreated = get_message(ll_lib, "_M_CLI_FCREATED");
-    printf("%s [%s]%s", fcreated, dir_path, LNE);
+    // print success message
+    print_message(mlib, "_M_CLI_FCREATED", dir_path);
     return EXIT_SUCCESS;
 }

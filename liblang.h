@@ -10,4 +10,3 @@
 #endif
 
 char *getm(char *code);
-
